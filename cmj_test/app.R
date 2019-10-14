@@ -1,12 +1,4 @@
-write.csv2(
-  x = "diff same", 
-  file = "test.csv"
-)
 
-write.csv2(
-  x = "diffhere same", 
-  file = "test2.csv"
-)
 
 library(DT)
 library(ggplot2)
