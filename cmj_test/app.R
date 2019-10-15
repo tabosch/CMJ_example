@@ -46,7 +46,7 @@ ui <- fluidPage(
     ),
     mainPanel(
       plotOutput("contents"),
-      dataTableOutput("contents2"),
+      #dataTableOutput("contents2"),
       plotOutput("contents3")
     )
   )
