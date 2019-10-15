@@ -11,14 +11,24 @@ ui <- fluidPage(
    h1('Force Plate Visuals'),
   sidebarLayout(
     sidebarPanel(
-      fileInput(
+      radioButtons("missingrows", "Is your data missing rows at the top of each file?", c("yes", "no"), selected = "no"),
+      conditionalPanel("input.missingrows== 'no'",fileInput(
         inputId = "files", 
         label = "Choose CSV File", 
         multiple = TRUE,
         accept = c("text/csv",
                    "text/comma-separated-values,text/plain",
                    ".csv")
-      ),
+      )),
+      conditionalPanel("input.missingrows == 'yes'", numericInput("mr", "What row does your data start on?", min =1, max = 20, value=8)),
+      conditionalPanel("input.missingrows == 'yes'",fileInput(
+        inputId = "missing_rowsfiles", 
+        label = "Choose CSV File", 
+        multiple = TRUE,
+        accept = c("text/csv",
+                   "text/comma-separated-values,text/plain",
+                   ".csv")
+      )),
       actionButton("runplot", "Plot Trials"),
       sliderInput("timefilter", "Select ranges to filter the time on the plots", min=0, max=6, step = 0.1, value = c(1,4)),
       actionButton("filter", "Filter Data"),
@@ -36,7 +46,7 @@ ui <- fluidPage(
     ),
     mainPanel(
       plotOutput("contents"),
-      #dataTableOutput("contents2")
+      dataTableOutput("contents2"),
       plotOutput("contents3")
     )
   )
@@ -51,14 +61,30 @@ server <- function(input, output) {
     ))
     
     if(input$filter == 0 && input$correction == 0) {
-    inFile <- input$files
-    jumpfiles <- inFile$datapath
+    #inFile <- input$files
+    #jumpfiles <- inFile$datapath
     #data_csv <- ldply(jumpfiles, read_csv)
-    read_csv_filename <- function(jumpfiles){
-      ret <- read.csv(jumpfiles)
-      ret$Source <- jumpfiles #EDIT
-      ret
-    }
+    #read_csv_filename <- function(jumpfiles){
+   #   ret <- read.csv(jumpfiles)
+  #    ret$Source <- jumpfiles #EDIT
+ #     ret
+#    }
+      if(!is.null(input$files)) { 
+        inFile <- input$files
+        jumpfiles <- inFile$datapath }
+      else {
+        inFile <- input$missing_rowsfiles
+        jumpfiles <- inFile$datapath}
+      
+      #data_csv <- ldply(jumpfiles, read_csv)
+      read_csv_filename <- function(jumpfiles){
+        if(!is.null(input$files)) {
+          ret <- read.csv(jumpfiles)
+        }
+        else{ret <- read.csv(jumpfiles, skip = input$mr - 1)}
+        ret$Source <- jumpfiles #EDIT
+        ret
+      }
     
     ## combines all .csv files into 1 data frame
     data_csv <- ldply(jumpfiles, read_csv_filename)
@@ -70,15 +96,33 @@ server <- function(input, output) {
     ggplot(data_csv, aes(Time..s., Combined..N., colour=trial))+
       geom_line()+
       theme_bw() }
-    else if(input$filter > 0  && input$correction == 0) { inFile <- input$files
-    jumpfiles <- inFile$datapath
+    else if(input$filter > 0  && input$correction == 0) { 
+      #inFile <- input$files
+   # jumpfiles <- inFile$datapath
     #data_csv <- ldply(jumpfiles, read_csv)
-    read_csv_filename <- function(jumpfiles){
-      ret <- read.csv(jumpfiles)
-      ret$Source <- jumpfiles #EDIT
-      ret
-    }
+  #  read_csv_filename <- function(jumpfiles){
+      #ret <- read.csv(jumpfiles)
+     # ret$Source <- jumpfiles #EDIT
+    #  ret
+   # }
     
+      if(!is.null(input$files)) { 
+        inFile <- input$files
+        jumpfiles <- inFile$datapath }
+      else {
+        inFile <- input$missing_rowsfiles
+        jumpfiles <- inFile$datapath}
+      
+      #data_csv <- ldply(jumpfiles, read_csv)
+      read_csv_filename <- function(jumpfiles){
+        if(!is.null(input$files)) {
+          ret <- read.csv(jumpfiles)
+        }
+        else{ret <- read.csv(jumpfiles, skip = input$mr - 1)}
+        ret$Source <- jumpfiles #EDIT
+        ret
+      }
+   
     ## combines all .csv files into 1 data frame
     data_csv <- ldply(jumpfiles, read_csv_filename)
     data_csv$trial <- as.numeric(as.factor(data_csv$Source))
@@ -93,15 +137,33 @@ server <- function(input, output) {
       
     }
     
-    else if(input$filter > 0 && input$corr == "yes" && input$correction >0) { inFile <- input$files
-    jumpfiles <- inFile$datapath
+    else if(input$filter > 0 && input$corr == "yes" && input$correction >0) {
+      #inFile <- input$files
+    #jumpfiles <- inFile$datapath
     #data_csv <- ldply(jumpfiles, read_csv)
-    read_csv_filename <- function(jumpfiles){
-      ret <- read.csv(jumpfiles)
-      ret$Source <- jumpfiles #EDIT
-      ret
-    }
+  #  read_csv_filename <- function(jumpfiles){
+      #ret <- read.csv(jumpfiles)
+     # ret$Source <- jumpfiles #EDIT
+    #  ret
+   # }
     
+      if(!is.null(input$files)) { 
+        inFile <- input$files
+        jumpfiles <- inFile$datapath }
+      else {
+        inFile <- input$missing_rowsfiles
+        jumpfiles <- inFile$datapath}
+      
+      #data_csv <- ldply(jumpfiles, read_csv)
+      read_csv_filename <- function(jumpfiles){
+        if(!is.null(input$files)) {
+          ret <- read.csv(jumpfiles)
+        }
+        else{ret <- read.csv(jumpfiles, skip = input$mr - 1)}
+        ret$Source <- jumpfiles #EDIT
+        ret
+      }
+   
     `%ni%` <- Negate(`%in%`)
     ## combines all .csv files into 1 data frame
     data_csv <- ldply(jumpfiles, read_csv_filename)
@@ -127,15 +189,32 @@ server <- function(input, output) {
     validate(
       need(input$runplot > 0, "Import Files and Click Plot Trials"
     ))
-    inFile <- input$files
-    jumpfiles <- inFile$datapath
+    #inFile <- input$files
+    #jumpfiles <- inFile$datapath
+    #data_csv <- ldply(jumpfiles, read_csv)
+    #read_csv_filename <- function(jumpfiles){
+    #  ret <- read.csv(jumpfiles)
+   #   ret$Source <- jumpfiles #EDIT
+  #    ret
+ #   }
+    
+    if(!is.null(input$files)) { 
+      inFile <- input$files
+      jumpfiles <- inFile$datapath }
+    else {
+      inFile <- input$missing_rowsfiles
+      jumpfiles <- inFile$datapath}
+    
     #data_csv <- ldply(jumpfiles, read_csv)
     read_csv_filename <- function(jumpfiles){
-      ret <- read.csv(jumpfiles)
+      if(!is.null(input$files)) {
+        ret <- read.csv(jumpfiles)
+      }
+      else{ret <- read.csv(jumpfiles, skip = input$mr - 1)}
       ret$Source <- jumpfiles #EDIT
       ret
     }
-    
+  
     ## combines all .csv files into 1 data frame
     data_csv <- ldply(jumpfiles, read_csv_filename)
     data_csv$trial <- as.numeric(as.factor(data_csv$Source))
@@ -149,15 +228,32 @@ server <- function(input, output) {
       need(input$runplot > 0, "Import Files and Click Plot Trials"
       ))
     if(input$filter == 0 && input$limbs == 0) {
-    inFile <- input$files
-    jumpfiles <- inFile$datapath
+    #inFile <- input$files
+    #jumpfiles <- inFile$datapath
     #data_csv <- ldply(jumpfiles, read_csv)
-    read_csv_filename <- function(jumpfiles){
-      ret <- read.csv(jumpfiles)
-      ret$Source <- jumpfiles #EDIT
-      ret
-    }
+    #read_csv_filename <- function(jumpfiles){
+     # ret <- read.csv(jumpfiles)
+    #  ret$Source <- jumpfiles #EDIT
+   #   ret
+  #  }
     
+      if(!is.null(input$files)) { 
+        inFile <- input$files
+        jumpfiles <- inFile$datapath }
+      else {
+        inFile <- input$missing_rowsfiles
+        jumpfiles <- inFile$datapath}
+      
+      #data_csv <- ldply(jumpfiles, read_csv)
+      read_csv_filename <- function(jumpfiles){
+        if(!is.null(input$files)) {
+          ret <- read.csv(jumpfiles)
+        }
+        else{ret <- read.csv(jumpfiles, skip = input$mr - 1)}
+        ret$Source <- jumpfiles #EDIT
+        ret
+      }
+   
     ## combines all .csv files into 1 data frame
     data_csv <- ldply(jumpfiles, read_csv_filename)
     data_csv$trial <- as.numeric(as.factor(data_csv$Source))
@@ -174,11 +270,29 @@ server <- function(input, output) {
       theme_bw()+
       facet_wrap(~trial)
   }
-  else if(input$filter > 0 && input$limbs == 0) { inFile <- input$files
-    jumpfiles <- inFile$datapath
+  else if(input$filter > 0 && input$limbs == 0) { 
+    #inFile <- input$files
+   # jumpfiles <- inFile$datapath
+    #data_csv <- ldply(jumpfiles, read_csv)
+  #  read_csv_filename <- function(jumpfiles){
+      #ret <- read.csv(jumpfiles)
+     # ret$Source <- jumpfiles #EDIT
+    #  ret
+   # }
+    
+    if(!is.null(input$files)) { 
+      inFile <- input$files
+      jumpfiles <- inFile$datapath }
+    else {
+      inFile <- input$missing_rowsfiles
+      jumpfiles <- inFile$datapath}
+    
     #data_csv <- ldply(jumpfiles, read_csv)
     read_csv_filename <- function(jumpfiles){
-      ret <- read.csv(jumpfiles)
+      if(!is.null(input$files)) {
+        ret <- read.csv(jumpfiles)
+      }
+      else{ret <- read.csv(jumpfiles, skip = input$mr - 1)}
       ret$Source <- jumpfiles #EDIT
       ret
     }
@@ -199,15 +313,30 @@ server <- function(input, output) {
       facet_wrap(~trial) }
     
    else if(input$limbs >0) {
-      inFile <- input$files
-      jumpfiles <- inFile$datapath
-      #data_csv <- ldply(jumpfiles, read_csv)
-      read_csv_filename <- function(jumpfiles){
-        ret <- read.csv(jumpfiles)
-        ret$Source <- jumpfiles #EDIT
-        ret
-      }
       
+      #data_csv <- ldply(jumpfiles, read_csv)
+      #read_csv_filename <- function(jumpfiles){
+        #ret <- read.csv(jumpfiles)
+        #ret$Source <- jumpfiles #EDIT
+       # ret
+      #}
+     if(!is.null(input$files)) { 
+     inFile <- input$files
+     jumpfiles <- inFile$datapath }
+     else {
+        inFile <- input$missing_rowsfiles
+        jumpfiles <- inFile$datapath}
+        
+        #data_csv <- ldply(jumpfiles, read_csv)
+        read_csv_filename <- function(jumpfiles){
+          if(!is.null(input$files)) {
+            ret <- read.csv(jumpfiles)
+          }
+          else{ret <- read.csv(jumpfiles, skip = input$mr - 1)}
+          ret$Source <- jumpfiles #EDIT
+          ret
+        }
+     
       ## combines all .csv files into 1 data frame
       data_csv <- ldply(jumpfiles, read_csv_filename)
       data_csv$trial <- as.numeric(as.factor(data_csv$Source))
