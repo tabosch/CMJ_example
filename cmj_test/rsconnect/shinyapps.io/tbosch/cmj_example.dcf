@@ -5,9 +5,9 @@ account: tbosch
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1326948
-bundleId: 2499614
+bundleId: 2502088
 url: https://tbosch.shinyapps.io/cmj_example/
-when: 1571073704.22231
+when: 1571147902.57562
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: test.csv|test2.csv
+ignoredFiles: test.csv|test2.csv|force_trace/trial1.csv|force_trace/trial2.csv|force_trace/trial3.csv|force_trace/trial4.csv|force_trace/trial5.csv|force_trace/trial6.csv
